@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { api, errorMessage } from '../api';
-import { Alert, Spinner } from '../components/ui';
+import { Alert, EmptyState, ProductImage, Spinner } from '../components/ui';
 import { money } from '../format';
 import { useShop } from '../ShopContext';
 import type { Order } from '../types';
@@ -56,9 +56,17 @@ function AuthForms() {
   };
 
   return (
-    <div className="mx-auto max-w-md">
-      <div className="card overflow-hidden">
-        <div className="grid grid-cols-2 border-b border-slate-200 text-sm font-semibold" role="tablist">
+    <div className="mx-auto max-w-md py-4">
+      <div className="mb-8 text-center">
+        <img src="/media/stan.png" alt="" className="mx-auto h-14 w-14 object-contain" />
+        <h1 className="page-title mt-4">{mode === 'login' ? 'Welcome back' : 'Create your account'}</h1>
+        <p className="mt-2 text-sm text-zinc-500">
+          {mode === 'login' ? 'Sign in to see your orders and keep your cart.' : 'It only takes a moment.'}
+        </p>
+      </div>
+
+      <div className="card p-6 sm:p-8">
+        <div className="mb-6 grid grid-cols-2 gap-1 rounded-full bg-zinc-100 p-1 text-sm font-semibold" role="tablist">
           {(['login', 'register'] as const).map((m) => (
             <button
               key={m}
@@ -66,16 +74,16 @@ function AuthForms() {
               role="tab"
               aria-selected={mode === m}
               onClick={() => switchMode(m)}
-              className={`py-3 transition ${
-                mode === m ? 'border-b-2 border-brand-600 text-brand-700' : 'text-slate-500 hover:text-slate-800'
+              className={`rounded-full py-2 transition ${
+                mode === m ? 'bg-white text-ink shadow-sm ring-1 ring-zinc-950/5' : 'text-zinc-500 hover:text-ink'
               }`}
             >
-              {m === 'login' ? 'Sign in' : 'Create account'}
+              {m === 'login' ? 'Sign in' : 'Register'}
             </button>
           ))}
         </div>
 
-        <form onSubmit={onSubmit} className="space-y-4 p-6">
+        <form onSubmit={onSubmit} className="space-y-4">
           {error && <Alert tone="error">{error}</Alert>}
 
           <Field id="name" label="Name" value={name} onChange={setName} autoComplete="username" />
@@ -101,7 +109,7 @@ function AuthForms() {
             />
           )}
 
-          <button type="submit" disabled={busy} className="btn-primary w-full py-2.5">
+          <button type="submit" disabled={busy} className="btn-primary btn-lg mt-2 w-full">
             {busy ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
           </button>
         </form>
@@ -154,41 +162,66 @@ function Account() {
   if (!user) return null;
 
   return (
-    <div className="space-y-6">
-      <div className="card flex items-center gap-4 p-6">
-        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-100 text-lg font-bold text-brand-700 uppercase">
-          {user.name.slice(0, 1)}
-        </span>
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Greetings, {user.name}</h1>
-          <p className="text-sm text-slate-500">{user.email}</p>
+    <div className="space-y-8">
+      <div className="relative overflow-hidden rounded-3xl bg-ink p-6 text-white shadow-pop sm:p-8">
+        <div className="absolute -top-20 -right-10 h-60 w-60 rounded-full bg-brand-600/40 blur-3xl" />
+        <div className="relative flex items-center gap-4">
+          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-400 to-fuchsia-500 font-display text-xl font-bold text-white uppercase shadow-lg">
+            {user.name.slice(0, 1)}
+          </span>
+          <div className="min-w-0">
+            <p className="text-sm text-zinc-400">Greetings,</p>
+            <h1 className="truncate font-display text-2xl font-bold tracking-tight text-white">{user.name}</h1>
+            <p className="truncate text-sm text-zinc-400">{user.email}</p>
+          </div>
         </div>
       </div>
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-slate-900">Order history</h2>
+      <section className="space-y-4">
+        <div className="flex items-baseline justify-between">
+          <h2 className="section-title">Order history</h2>
+          {history && history.length > 0 && (
+            <span className="text-sm text-zinc-500">
+              {history.length} order{history.length === 1 ? '' : 's'}
+            </span>
+          )}
+        </div>
         {history === null ? (
           <Spinner />
         ) : history.length === 0 ? (
-          <div className="card p-8 text-center text-sm text-slate-500">No orders yet.</div>
+          <EmptyState title="No orders yet">
+            <p className="text-sm text-zinc-500">When you place an order it will show up here.</p>
+          </EmptyState>
         ) : (
           <ul className="space-y-3">
-            {history.map((order) => (
-              <li key={order.orderid} className="card p-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-mono text-xs text-slate-500">#{order.orderid}</span>
-                  <span className="font-semibold text-slate-900 tabular-nums">{money(order.cart.total)}</span>
-                </div>
-                <ul className="mt-2 flex flex-wrap gap-2">
-                  {order.cart.items.map((item) => (
-                    <li key={item.sku} className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700">
-                      {item.qty > 1 ? `${item.qty} × ` : ''}
-                      {item.name}
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))}
+            {history.map((order) => {
+              const items = order.cart.items.filter((i) => i.sku !== 'SHIP');
+              return (
+                <li key={order.orderid} className="card p-5">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-medium text-zinc-500">Order</p>
+                      <p className="font-mono text-sm font-semibold text-ink">#{order.orderid}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="badge bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 ring-inset">Paid</span>
+                      <span className="price text-lg">{money(order.cart.total)}</span>
+                    </div>
+                  </div>
+                  <ul className="mt-4 flex flex-wrap gap-2 border-t border-zinc-100 pt-4">
+                    {items.map((item) => (
+                      <li key={item.sku} className="chip py-1 pr-3 pl-1">
+                        <span className="tile flex h-6 w-6 items-center justify-center rounded-full p-0.5">
+                          <ProductImage sku={item.sku} alt="" className="max-h-full max-w-full object-contain" />
+                        </span>
+                        {item.qty > 1 ? `${item.qty} × ` : ''}
+                        {item.name}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

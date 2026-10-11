@@ -30,11 +30,17 @@ export default function Categories() {
   };
 
   return (
-    <nav className="card p-4" aria-label="Categories">
-      <h2 className="mb-3 px-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">Categories</h2>
-      {categories === null && <p className="px-2 text-sm text-slate-400">Loading…</p>}
-      {categories?.length === 0 && <p className="px-2 text-sm text-slate-400">Catalogue unavailable</p>}
-      <ul className="space-y-1">
+    <nav className="card p-3" aria-label="Categories">
+      <h2 className="px-3 pt-2 pb-3 text-[11px] font-semibold tracking-[0.14em] text-zinc-400 uppercase">Shop by category</h2>
+      {categories === null && (
+        <div className="space-y-2 px-3 pb-2">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="skeleton h-8" />
+          ))}
+        </div>
+      )}
+      {categories?.length === 0 && <p className="px-3 pb-2 text-sm text-zinc-400">Catalogue unavailable</p>}
+      <ul className="space-y-0.5">
         {categories?.map((cat) => {
           const products = open[cat];
           return (
@@ -43,22 +49,26 @@ export default function Categories() {
                 type="button"
                 onClick={() => toggle(cat)}
                 aria-expanded={!!products}
-                className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-100"
+                className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition ${
+                  products ? 'bg-brand-50 text-brand-700' : 'text-zinc-700 hover:bg-zinc-100 hover:text-ink'
+                }`}
               >
                 {cat}
-                <ChevronIcon className={`h-4 w-4 text-slate-400 transition-transform ${products ? 'rotate-90' : ''}`} />
+                <ChevronIcon
+                  className={`h-4 w-4 transition-transform duration-200 ${products ? 'rotate-90 text-brand-500' : 'text-zinc-400'}`}
+                />
               </button>
               {products && (
-                <ul className="mt-1 mb-2 ml-2 space-y-0.5 border-l border-slate-200 pl-3">
+                <ul className="mt-1 mb-2 ml-4 animate-fade-in space-y-0.5 border-l-2 border-brand-100 pl-2">
                   {products.map((p) => (
                     <li key={p.sku}>
                       <NavLink
                         to={`/product/${p.sku}`}
                         className={({ isActive }) =>
-                          `block rounded-md px-2 py-1.5 text-sm transition ${
+                          `block rounded-lg px-3 py-1.5 text-sm transition ${
                             isActive
-                              ? 'bg-brand-50 font-medium text-brand-700'
-                              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                              ? 'bg-ink font-medium text-white'
+                              : 'text-zinc-600 hover:bg-zinc-100 hover:text-ink'
                           }`
                         }
                       >

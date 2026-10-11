@@ -104,7 +104,7 @@ export default function LocationAutocomplete({ countryCode, disabled, onSelect }
         <ul
           id={listId}
           role="listbox"
-          className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-lg border border-slate-200 bg-white py-1 text-sm shadow-lg"
+          className="absolute z-20 mt-2 max-h-64 w-full animate-fade-in overflow-auto rounded-xl bg-white p-1.5 text-sm shadow-pop ring-1 ring-zinc-950/10"
         >
           {matches.map((m, i) => (
             <li
@@ -117,7 +117,7 @@ export default function LocationAutocomplete({ countryCode, disabled, onSelect }
                 choose(m);
               }}
               onMouseEnter={() => setActive(i)}
-              className={`cursor-pointer px-3 py-2 ${i === active ? 'bg-brand-50 text-brand-800' : 'text-slate-700'}`}
+              className={`cursor-pointer rounded-lg px-3 py-2 transition-colors ${i === active ? 'bg-brand-50 font-medium text-brand-700' : 'text-zinc-700'}`}
             >
               {m.name}
             </li>

@@ -2,55 +2,202 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Orbitron", ui-sans-serif, sans-serif;
+  --font-display: "Space Grotesk", "Inter", ui-sans-serif, sans-serif;
 
-  --color-brand-50: #eef7ff;
-  --color-brand-100: #d9edff;
-  --color-brand-200: #bce0ff;
-  --color-brand-300: #8ecdff;
-  --color-brand-400: #59b0ff;
-  --color-brand-500: #338dfc;
-  --color-brand-600: #1d6ff1;
-  --color-brand-700: #1558de;
-  --color-brand-800: #1847b4;
-  --color-brand-900: #1a3f8e;
-  --color-brand-950: #152856;
+  /* Brand: electric indigo */
+  --color-brand-50: #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-200: #c7d2fe;
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #818cf8;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+  --color-brand-800: #3730a3;
+  --color-brand-900: #312e81;
+  --color-brand-950: #1e1b4b;
+
+  /* Ink: primary text and the dark call-to-action colour */
+  --color-ink: #0b0b12;
+
+  --shadow-card: 0 1px 2px rgb(15 15 30 / 0.04), 0 1px 1px rgb(15 15 30 / 0.03);
+  --shadow-lift: 0 12px 32px -12px rgb(15 15 30 / 0.18), 0 2px 6px -2px rgb(15 15 30 / 0.06);
+  --shadow-pop: 0 20px 40px -16px rgb(15 15 30 / 0.25), 0 4px 10px -4px rgb(15 15 30 / 0.08);
+
+  --animate-fade-in: fade-in 0.35s ease-out both;
+  --animate-shimmer: shimmer 1.6s linear infinite;
 }
 
-@layer base {
-  body {
-    @apply bg-slate-50 text-slate-800 antialiased;
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
-@utility card {
-  @apply rounded-2xl border border-slate-200 bg-white shadow-sm;
+@keyframes shimmer {
+  from {
+    background-position: -400px 0;
+  }
+  to {
+    background-position: 400px 0;
+  }
 }
 
+@layer base {
+  html {
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    @apply bg-zinc-50 font-sans text-zinc-700 antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply text-ink;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    @apply bg-brand-200 text-brand-950;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+
+  /* number inputs use custom steppers */
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ---------- Surfaces ---------- */
+
+@utility card {
+  @apply rounded-2xl bg-white shadow-card ring-1 ring-zinc-950/[0.06];
+}
+
+@utility card-hover {
+  @apply transition duration-300 hover:-translate-y-1 hover:shadow-lift hover:ring-zinc-950/10;
+}
+
+@utility tile {
+  /* soft backdrop behind product imagery */
+  @apply bg-gradient-to-b from-zinc-100 to-zinc-50;
+}
+
+@utility skeleton {
+  @apply rounded-lg bg-zinc-200/70;
+  background-image: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.6), transparent);
+  background-size: 400px 100%;
+  background-repeat: no-repeat;
+  animation: var(--animate-shimmer);
+}
+
+/* ---------- Buttons ---------- */
+
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold whitespace-nowrap
+    transition duration-200 select-none active:scale-[0.98]
     focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500
-    disabled:cursor-not-allowed disabled:opacity-50;
+    disabled:pointer-events-none disabled:opacity-50;
 }
 
 @utility btn-primary {
-  @apply btn bg-brand-600 text-white hover:bg-brand-700;
+  @apply btn bg-ink text-white shadow-sm hover:bg-zinc-800 hover:shadow-lift;
+}
+
+@utility btn-accent {
+  @apply btn bg-brand-600 text-white shadow-sm shadow-brand-600/30 hover:bg-brand-500 hover:shadow-lg hover:shadow-brand-600/30;
 }
 
 @utility btn-secondary {
-  @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50;
+  @apply btn bg-white text-ink ring-1 ring-zinc-300 ring-inset hover:bg-zinc-50 hover:ring-zinc-400;
 }
 
+@utility btn-ghost {
+  @apply btn px-3 text-zinc-600 hover:bg-zinc-100 hover:text-ink;
+}
+
+@utility btn-lg {
+  @apply px-7 py-3.5 text-base;
+}
+
+@utility icon-btn {
+  @apply inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-600 transition
+    hover:bg-zinc-100 hover:text-ink disabled:pointer-events-none disabled:opacity-40;
+}
+
+/* ---------- Forms ---------- */
+
 @utility input {
-  @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-xs
-    placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none
-    disabled:cursor-not-allowed disabled:bg-slate-100;
+  @apply block w-full rounded-xl border-0 bg-white px-4 py-3 text-sm text-ink shadow-xs ring-1 ring-zinc-300 ring-inset
+    transition placeholder:text-zinc-400
+    hover:ring-zinc-400 focus:ring-2 focus:ring-brand-500 focus:outline-none
+    disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400 disabled:ring-zinc-200;
+}
+
+@utility select {
+  @apply appearance-none bg-no-repeat pr-10;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2371717a'%3E%3Cpath d='M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z'/%3E%3C/svg%3E");
+  background-position: right 0.75rem center;
+  background-size: 1.25rem;
 }
 
 @utility label {
-  @apply mb-1 block text-sm font-medium text-slate-700;
+  @apply mb-1.5 block text-sm font-medium text-zinc-800;
 }
 
+/* ---------- Typography ---------- */
+
 @utility page-title {
-  @apply text-2xl font-bold tracking-tight text-slate-900;
+  @apply font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl;
+}
+
+@utility section-title {
+  @apply font-display text-lg font-semibold tracking-tight text-ink;
+}
+
+@utility eyebrow {
+  @apply text-xs font-semibold tracking-[0.14em] text-brand-600 uppercase;
+}
+
+@utility price {
+  @apply font-display font-bold tracking-tight text-ink tabular-nums;
+}
+
+/* ---------- Bits ---------- */
+
+@utility chip {
+  @apply inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700;
+}
+
+@utility badge {
+  @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold;
+}
+
+@utility divider {
+  @apply h-px w-full bg-zinc-200/80;
 }

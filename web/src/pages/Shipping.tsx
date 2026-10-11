@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { api, errorMessage } from '../api';
 import LocationAutocomplete from '../components/LocationAutocomplete';
 import Steps from '../components/Steps';
+import { ArrowRightIcon, TruckIcon } from '../components/icons';
 import { Alert } from '../components/ui';
 import { money } from '../format';
 import { useShop } from '../ShopContext';
@@ -53,71 +54,86 @@ export default function Shipping() {
   };
 
   return (
-    <div className="mx-auto max-w-xl space-y-6">
+    <div className="mx-auto max-w-2xl space-y-8">
       <Steps current={1} />
-      <h1 className="page-title">Shipping information</h1>
+      <div>
+        <h1 className="page-title">Shipping</h1>
+        <p className="mt-2 text-sm text-zinc-500">Tell us where your robot is headed and we'll work out the delivery cost.</p>
+      </div>
 
       {error && <Alert tone="error">{error}</Alert>}
 
-      <div className="card space-y-5 p-6">
-        <div>
-          <label htmlFor="country" className="label">
-            Country
-          </label>
-          <select
-            id="country"
-            className="input"
-            value={country?.code ?? ''}
-            onChange={(e) => {
-              setCountry(countries.find((c) => c.code === e.target.value) ?? null);
-              setLocation(null);
-              setQuote(null);
-            }}
-          >
-            <option value="" disabled>
-              Select a country…
-            </option>
-            {countries.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.name}
+      <div className="card space-y-5 p-6 sm:p-8">
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label htmlFor="country" className="label">
+              Country
+            </label>
+            <select
+              id="country"
+              className="input select"
+              value={country?.code ?? ''}
+              onChange={(e) => {
+                setCountry(countries.find((c) => c.code === e.target.value) ?? null);
+                setLocation(null);
+                setQuote(null);
+              }}
+            >
+              <option value="" disabled>
+                Select a country…
               </option>
-            ))}
-          </select>
-        </div>
+              {countries.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div>
-          <label htmlFor="location" className="label">
-            Location
-          </label>
-          <LocationAutocomplete
-            countryCode={country?.code ?? ''}
-            disabled={!country}
-            onSelect={(m) => {
-              setLocation(m);
-              setQuote(null);
-            }}
-          />
+          <div>
+            <label htmlFor="location" className="label">
+              Town or city
+            </label>
+            <LocationAutocomplete
+              countryCode={country?.code ?? ''}
+              disabled={!country}
+              onSelect={(m) => {
+                setLocation(m);
+                setQuote(null);
+              }}
+            />
+          </div>
         </div>
 
         <button type="button" onClick={calculate} disabled={!location || busy} className="btn-secondary w-full">
+          <TruckIcon className="h-4 w-4" />
           {busy && !quote ? 'Calculating…' : 'Calculate shipping'}
         </button>
       </div>
 
       {quote && (
-        <div className="card space-y-4 p-6">
-          <dl className="grid grid-cols-2 gap-4 text-sm">
+        <div className="card animate-fade-in space-y-6 p-6 sm:p-8">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+              <TruckIcon className="h-5 w-5" />
+            </span>
             <div>
-              <dt className="text-slate-500">Distance</dt>
-              <dd className="text-lg font-semibold text-slate-900 tabular-nums">{quote.distance} km</dd>
+              <p className="text-xs font-medium text-zinc-500">Delivering to</p>
+              <p className="font-semibold text-ink">{quote.location}</p>
             </div>
-            <div>
-              <dt className="text-slate-500">Shipping cost</dt>
-              <dd className="text-lg font-semibold text-slate-900 tabular-nums">{money(quote.cost)}</dd>
+          </div>
+          <dl className="grid grid-cols-2 gap-4">
+            <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-950/5">
+              <dt className="text-xs font-medium text-zinc-500">Distance</dt>
+              <dd className="price mt-1 text-2xl">{quote.distance} km</dd>
+            </div>
+            <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-950/5">
+              <dt className="text-xs font-medium text-zinc-500">Shipping cost</dt>
+              <dd className="price mt-1 text-2xl">{money(quote.cost)}</dd>
             </div>
           </dl>
-          <button type="button" onClick={confirm} disabled={busy} className="btn-primary w-full py-2.5">
-            Confirm and continue to payment
+          <button type="button" onClick={confirm} disabled={busy} className="btn-primary btn-lg w-full">
+            Continue to payment <ArrowRightIcon className="h-4 w-4" />
           </button>
         </div>
       )}
